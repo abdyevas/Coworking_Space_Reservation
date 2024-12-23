@@ -1,29 +1,35 @@
+import models.Reservations;
+import models.Spaces;
+
 import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Customer {
     private Scanner scanner = new Scanner(System.in);
-    private ArrayList<HashMap<String, Object>> spaces;
-    private ArrayList<HashMap<String, Object>> reservations;
+    private ArrayList<Spaces> spaces;
+    private ArrayList<Reservations> reservations;
     private int reservationID = 0;
 
-    public Customer(ArrayList<HashMap<String, Object>> spaces, ArrayList<HashMap<String, Object>> reservations) {
+    public Customer(ArrayList<Spaces> spaces, ArrayList<Reservations> reservations) {
         this.spaces = spaces;
         this.reservations = reservations;
     }
 
     public void customerMenu() {
+        String customerMenu = """
+                +--------------------------------------+
+                |   Customer Menu:                     |
+                |   1. Browse available spaces.        |
+                |   2. Make a reservation.             |
+                |   3. Cancel a reservation.           |
+                |   4. View my reservations.           |
+                |   5. Back to the Main Menu.          |
+                |   6. Exit.                           |
+                +--------------------------------------+
+                """;
+
         while (true) {
-            System.out.println("-".repeat(40));
-            System.out.println("|   Customer Menu:                     |");
-            System.out.println("|   1. Browse available spaces.        |");
-            System.out.println("|   2. Make a reservation.             |");
-            System.out.println("|   3. Cancel a reservation.           |");
-            System.out.println("|   4. View my reservations.           |");
-            System.out.println("|   5. Back to the Main Menu.          |");
-            System.out.println("|   6. Exit.                           |");
-            System.out.println("-".repeat(40));
+            System.out.println(customerMenu);
             System.out.println("\nYour option: ");
 
             int optionCustomer = scanner.nextInt();
@@ -50,42 +56,55 @@ public class Customer {
 
     private void browseSpaces() {
         System.out.println("\nAvailable Coworking Spaces:");
-
-        if (spaces.isEmpty()) {
-            System.out.println("No spaces available at the moment.\n");
-        } else {
-            for (HashMap<String, Object> space: spaces) {
-                System.out.println("\nID: " + space.get("spaceID") + "\nType: " + space.get("type") + 
-                        "\nPrice: " + space.get("price") + " AZN"  + 
-                        "\nAvailability: " + ((Boolean) space.get("isAvailable") ? "Available\n" : "Not available\n"));
-            }
-        }
-    }
-
-    private void makeReservation() {
-        if (spaces.isEmpty()) {
+        
+        if (spaces == null) {
             System.out.println("No spaces available at the moment.\n");
             return;
         }
 
-        HashMap<String, Object> reservation = new HashMap<>();
+        for (Spaces space: spaces) {
+            if (space.getAvailable()) {
+                System.out.println(space);
+            }    
+        } 
+    }
+
+    private void makeReservation() {
+        if (spaces == null) {
+            System.out.println("No spaces available at the moment.\n");
+            return;
+        }
 
         System.out.println("\nNew Reservaion: ");
-
         
         System.out.println("\nEnter your full name: ");
         scanner.nextLine();
         String customerName = scanner.nextLine();
         
         System.out.println("Choose one of the available spaces: ");
-        for (HashMap<String, Object> space : spaces) {
-            if ((Boolean) space.get("isAvailable")) {
-                System.out.println("Available Space ID: " + space.get("spaceID"));
+        for (Spaces space : spaces) {
+            if (space.getAvailable()) {
+                System.out.println("Available Space ID: " + space.getSpaceID());
             }
         }
         int spaceID = scanner.nextInt();
         
+        Spaces chosenSpace = null; 
+        
+        for (Spaces space: spaces) {
+            if (space.getSpaceID() == spaceID && space.getAvailable()) {
+                chosenSpace = space;
+                break;
+            }
+        } 
+        
+        if (chosenSpace == null) {
+            System.out.println("Invalid ID or Space is not available.\n");
+            return;
+        }
+
         System.out.println("Enter date (DD-MM-YYYY): ");
+        scanner.nextLine();
         String date = scanner.next();
         
         System.out.println("Enter start time (HH:MM): ");
@@ -93,31 +112,12 @@ public class Customer {
         
         System.out.println("Enter end time (HH:MM): ");
         String endTime = scanner.next();
-        
-        HashMap<String, Object> choosenSpace = null; 
-        
-        for (HashMap<String, Object> space: spaces) {
-            if ((int) space.get("spaceID") == spaceID && (Boolean) space.get("isAvailable")) {
-                choosenSpace = space;
-                break;
-            }
-        } 
-        
-        if (choosenSpace == null) {
-            System.out.println("Invalid ID or Space is not available.\n");
-            return;
-        }
 
         reservationID++; 
-        reservation.put("reservationID", reservationID);
-        reservation.put("name", customerName); 
-        reservation.put("spaceID", spaceID);
-        reservation.put("date", date);
-        reservation.put("startTime", startTime);
-        reservation.put("endTime", endTime);
+        Reservations reservation = new Reservations(reservationID, customerName, spaceID, date, startTime, endTime);
         reservations.add(reservation);
-
-        choosenSpace.put("isAvailable", false);
+        
+        chosenSpace.setAvailable(false);
         System.out.println("Reservation made successfully!\n");
     }
 
@@ -127,16 +127,16 @@ public class Customer {
             return;
         }
 
-        System.out.println("\nEnter reservation ID to remove: ");
-        for (HashMap<String, Object> reservation : reservations) {
-            System.out.println("Active reservation ID: " + reservation.get("reservationID"));
+        System.out.println("\nEnter reservation ID to cancel: ");
+        for (Reservations reservation : reservations) {
+            System.out.println("Active reservation ID: " + reservation.getReservationID());
         }
 
         int id = scanner.nextInt();
-        HashMap<String, Object> canceledReservation = null;
+        Reservations canceledReservation = null;
 
-        for (HashMap<String, Object> reservation : reservations) {
-            if ((int) reservation.get("reservationID") == id) {
+        for (Reservations reservation : reservations) {
+            if (reservation.getReservationID() == id) {
                 canceledReservation = reservation;
                 break;
             }
@@ -147,9 +147,10 @@ public class Customer {
         } else {
             reservations.remove(canceledReservation);
             System.out.println("Reservation removed successfully!");
-            for (HashMap<String, Object> space : spaces) {
-                if ((int) space.get("spaceID") == (int) canceledReservation.get("reservationID")) {
-                    space.put("isAvailable", true);
+
+            for (Spaces space : spaces) {
+                if (space.getSpaceID() == canceledReservation.getSpaceID()) {
+                    space.setAvailable(true);
                     break;
                 }
             }
@@ -160,12 +161,10 @@ public class Customer {
         if (reservations.isEmpty()) {
             System.out.println("No reservations found.\n");
         } else {
-            System.out.println("Coworking Spaces:");
+            System.out.println("Your reservations:");
 
-            for (HashMap<String, Object> reservation : reservations) {
-                System.out.println("\nID: " + reservation.get("reservationID") + 
-                    "\nSpace ID: " + reservation.get("spaceID") + "\nDate: " + reservation.get("date") + 
-                    "\nTime: " + reservation.get("startTime") + " to " + reservation.get("endTime") + "\n");
+            for (Reservations reservation : reservations) {
+                System.out.println(reservation);    
             }
         }
     }
