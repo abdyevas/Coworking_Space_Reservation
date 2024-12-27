@@ -1,4 +1,5 @@
 import models.Reservations;
+import models.Spaces;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -6,10 +7,11 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        ArrayList<Spaces> spaces = new ArrayList<>();
         ArrayList<Reservations> reservations = new ArrayList<>();
 
         Admin admin = new Admin(reservations);
-        Customer customer = new Customer(admin.getScapes(), reservations);
+        Customer customer = new Customer(spaces);
 
         System.out.println("\nWelcome to the Coworking Space Reservation System!");
         System.out.println("Find, book, and manage coworking spaces easily.\n");

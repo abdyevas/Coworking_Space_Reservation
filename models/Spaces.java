@@ -1,6 +1,8 @@
 package models;
 
-public class Spaces {
+import java.io.Serializable;
+
+public class Spaces implements Serializable {
     private int spaceID;
     private String type;
     private double price;

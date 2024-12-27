@@ -1,6 +1,8 @@
 package models;
 
-public class Reservations {
+import java.io.Serializable;
+
+public class Reservations implements Serializable{
     private int reservationID;
     private String customerName; 
     private int spaceID;
