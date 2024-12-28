@@ -1,5 +1,6 @@
 import models.Reservations;
 import models.Spaces;
+import exceptions.*;
 
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -9,10 +10,13 @@ public class Admin {
     private ArrayList<Spaces> spaces;
     private ArrayList<Reservations> reservations;
     private int lastId = 0;
+    
+    private static final String SPACES_DATA_FILE = "spaces.dat";
+    private static final String RESERVATIONS_DATA_FILE = "reservations.dat";
 
     public Admin(ArrayList<Reservations> reservations) {
-        this.reservations = reservations;
-        this.spaces = new ArrayList<>();
+        this.reservations = FileUtils.loadReservaionsData(RESERVATIONS_DATA_FILE);
+        this.spaces = FileUtils.loadSpacesData(SPACES_DATA_FILE);
     }
 
     public void adminMenu() {
@@ -36,7 +40,11 @@ public class Admin {
             if (optionAdmin == 1) {
                 addCoworkingSpace();
             } else if (optionAdmin == 2) {
-                removeCoworkingSpace();
+                try {
+                    removeCoworkingSpace();
+                } catch (InvalidSpaceIDException e) {
+                    System.out.println(e.getMessage()); 
+                }
             } else if (optionAdmin == 3) {
                 viewAllReservations();
             } else if (optionAdmin == 4) {
@@ -63,9 +71,11 @@ public class Admin {
 
         spaces.add(new Spaces(lastId, type, price, true));
         System.out.println("Space added successfully!\n");
+
+        saveSpacesData();
     }
 
-    private void removeCoworkingSpace() {
+    private void removeCoworkingSpace() throws InvalidSpaceIDException{
         if (spaces.isEmpty()) {
             System.out.println("No spaces found.\n");
             return;
@@ -88,13 +98,16 @@ public class Admin {
                 break;
             }
         }
-
         if (!isRemoved) {
-            System.out.println("ID not found.\n");
+            throw new InvalidSpaceIDException("Space ID now found: " + id + "\n");
         }
+        
+        saveSpacesData();
     }
 
     private void viewAllReservations() {
+        reservations = FileUtils.loadReservaionsData(RESERVATIONS_DATA_FILE);
+
         if (reservations.isEmpty()) {
             System.out.println("No reservations found.\n");
         } else {
@@ -106,7 +119,7 @@ public class Admin {
         }
     }
     
-    public ArrayList<Spaces> getScapes() {
-        return spaces;
+    public void saveSpacesData() {
+        FileUtils.saveSpacesData(spaces, SPACES_DATA_FILE);
     }
 }

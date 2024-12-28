@@ -1,5 +1,6 @@
 import models.Reservations;
 import models.Spaces;
+import exceptions.*;
 
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -10,9 +11,12 @@ public class Customer {
     private ArrayList<Reservations> reservations;
     private int reservationID = 0;
 
-    public Customer(ArrayList<Spaces> spaces, ArrayList<Reservations> reservations) {
-        this.spaces = spaces;
-        this.reservations = reservations;
+    private static final String SPACES_DATA_FILE = "spaces.dat";
+    private static final String RESERVATIONS_DATA_FILE = "reservations.dat";
+
+    public Customer(ArrayList<Spaces> spaces) {
+        this.reservations = FileUtils.loadReservaionsData(RESERVATIONS_DATA_FILE);
+        this.spaces = FileUtils.loadSpacesData(SPACES_DATA_FILE);
     }
 
     public void customerMenu() {
@@ -37,7 +41,11 @@ public class Customer {
             if (optionCustomer == 1) {
                 browseSpaces();
             } else if (optionCustomer == 2) {
-                makeReservation();
+                try {
+                    makeReservation();
+                } catch (InvalidSpaceIDException e) {
+                    System.out.println(e.getMessage());
+                }
             } else if (optionCustomer == 3) {
                 cancelReservation();
             } else if (optionCustomer == 4) {
@@ -55,6 +63,8 @@ public class Customer {
     }
 
     private void browseSpaces() {
+        spaces = FileUtils.loadSpacesData(SPACES_DATA_FILE);
+
         System.out.println("\nAvailable Coworking Spaces:");
         
         if (spaces == null) {
@@ -69,7 +79,9 @@ public class Customer {
         } 
     }
 
-    private void makeReservation() {
+    private void makeReservation() throws InvalidSpaceIDException{
+        spaces = FileUtils.loadSpacesData(SPACES_DATA_FILE);
+
         if (spaces == null) {
             System.out.println("No spaces available at the moment.\n");
             return;
@@ -99,8 +111,7 @@ public class Customer {
         } 
         
         if (chosenSpace == null) {
-            System.out.println("Invalid ID or Space is not available.\n");
-            return;
+            throw new InvalidSpaceIDException("Invalid ID or Space is not available.\n");
         }
 
         System.out.println("Enter date (DD-MM-YYYY): ");
@@ -119,6 +130,8 @@ public class Customer {
         
         chosenSpace.setAvailable(false);
         System.out.println("Reservation made successfully!\n");
+    
+        saveReservationsData();
     }
 
     private void cancelReservation() {
@@ -155,6 +168,8 @@ public class Customer {
                 }
             }
         }
+        
+        saveReservationsData();    
     }
 
     private void viewMyReservations() {
@@ -167,5 +182,9 @@ public class Customer {
                 System.out.println(reservation);    
             }
         }
+    }
+
+    public void saveReservationsData() {
+        FileUtils.saveReservationsData(reservations, RESERVATIONS_DATA_FILE);
     }
 }
