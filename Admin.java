@@ -1,6 +1,7 @@
 import models.Reservations;
 import models.Spaces;
 import exceptions.*;
+import classloader.CustomClassLoader;
 
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -26,8 +27,9 @@ public class Admin {
                 |   1. Add a new coworking scape.      |
                 |   2. Remove a coworking space.       |
                 |   3. View all reservations.          |
-                |   4. Back to the Main Menu.          |
-                |   5. Exit.                           |
+                |   4. Load Custom Class.              |
+                |   5. Back to the Main Menu.          |
+                |   6. Exit.                           |
                 +--------------------------------------+
                 """;
                 
@@ -48,9 +50,19 @@ public class Admin {
             } else if (optionAdmin == 3) {
                 viewAllReservations();
             } else if (optionAdmin == 4) {
+                System.out.println("Enter the details of the class to be loaded.\n");
+                System.out.println("Class directory: ");
+                scanner.nextLine();
+                String classPath = scanner.nextLine();
+
+                System.out.println("Full class name: ");
+                String className = scanner.nextLine();
+
+                loadCustomClass(classPath, className);    
+            } else if (optionAdmin == 5) {
                 System.out.println("Switching back to the Main Menu...\n");
                 return;
-            } else if (optionAdmin == 5) {
+            } else if (optionAdmin == 6) {
                 System.out.println("Thank you for using our system. Bye!\n");
                 System.exit(0);
             } else {
@@ -121,5 +133,16 @@ public class Admin {
     
     public void saveSpacesData() {
         FileUtils.saveSpacesData(spaces, SPACES_DATA_FILE);
+    }
+
+    
+    public static void loadCustomClass(String classPath, String className) {
+        CustomClassLoader customClassLoader = new CustomClassLoader(classPath, Main.class.getClassLoader());
+        try {
+            Class<?> loaderClass = customClassLoader.loadClass(className);
+            System.out.println("Class " + loaderClass.getName() + " loaded successfully!\n");
+        } catch (Exception e) {
+            System.out.println(e.getMessage() + "\n");
+        }
     }
 }
