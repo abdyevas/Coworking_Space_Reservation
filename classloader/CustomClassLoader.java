@@ -5,7 +5,7 @@ import java.io.*;
 public class CustomClassLoader extends ClassLoader {
     private String path;
 
-    public CustomClassLoader(String pass, ClassLoader parent) {
+    public CustomClassLoader(String path, ClassLoader parent) {
         super(parent);
         this.path = path;
     }
