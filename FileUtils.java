@@ -15,6 +15,7 @@ public class FileUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static ArrayList<Spaces> loadSpacesData(String spacesDataFile) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(spacesDataFile))) {
             return (ArrayList<Spaces>) in.readObject();
@@ -34,6 +35,7 @@ public class FileUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static ArrayList<Reservations> loadReservaionsData(String reservationsDataFile) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(reservationsDataFile))) {
             return (ArrayList<Reservations>) in.readObject();

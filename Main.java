@@ -19,9 +19,9 @@ public class Main {
         String mainMenu = """
                 +--------------------------------------+       
                 |   Choose one of the options below:   |       
-                |   1. Login as Admin                  |       
-                |   2. Login as User                   |       
-                |   3. Exit                            |       
+                |   1. Login as Admin.                 |       
+                |   2. Login as User.                  |       
+                |   3. Exit.                           |       
                 +--------------------------------------+ 
                 """;
         
