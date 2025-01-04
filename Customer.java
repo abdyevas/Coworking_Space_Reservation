@@ -15,8 +15,8 @@ public class Customer {
     private static final String RESERVATIONS_DATA_FILE = "reservations.dat";
 
     public Customer(ArrayList<Spaces> spaces) {
-        this.reservations = FileUtils.loadReservaionsData(RESERVATIONS_DATA_FILE);
-        this.spaces = FileUtils.loadSpacesData(SPACES_DATA_FILE);
+        this.reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
+        this.spaces = FileUtils.loadData(SPACES_DATA_FILE);
     }
 
     public void customerMenu() {
@@ -63,7 +63,7 @@ public class Customer {
     }
 
     private void browseSpaces() {
-        spaces = FileUtils.loadSpacesData(SPACES_DATA_FILE);
+        spaces = FileUtils.loadData(SPACES_DATA_FILE);
 
         System.out.println("\nAvailable Coworking Spaces:");
         
@@ -80,7 +80,7 @@ public class Customer {
     }
 
     private void makeReservation() throws InvalidSpaceIDException{
-        spaces = FileUtils.loadSpacesData(SPACES_DATA_FILE);
+        spaces = FileUtils.loadData(SPACES_DATA_FILE);
 
         if (spaces == null) {
             System.out.println("No spaces available at the moment.\n");
@@ -131,7 +131,7 @@ public class Customer {
         chosenSpace.setAvailable(false);
         System.out.println("Reservation made successfully!\n");
     
-        saveReservationsData();
+        updateData();
     }
 
     private void cancelReservation() {
@@ -169,7 +169,7 @@ public class Customer {
             }
         }
         
-        saveReservationsData();    
+        updateData();    
     }
 
     private void viewMyReservations() {
@@ -184,7 +184,8 @@ public class Customer {
         }
     }
 
-    public void saveReservationsData() {
-        FileUtils.saveReservationsData(reservations, RESERVATIONS_DATA_FILE);
+    public void updateData() {
+        FileUtils.saveData(reservations, RESERVATIONS_DATA_FILE);
+        FileUtils.saveData(spaces, SPACES_DATA_FILE);
     }
 }
