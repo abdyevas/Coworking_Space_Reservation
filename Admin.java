@@ -16,8 +16,8 @@ public class Admin {
     private static final String RESERVATIONS_DATA_FILE = "reservations.dat";
 
     public Admin(ArrayList<Reservations> reservations) {
-        this.reservations = FileUtils.loadReservaionsData(RESERVATIONS_DATA_FILE);
-        this.spaces = FileUtils.loadSpacesData(SPACES_DATA_FILE);
+        this.reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
+        this.spaces = FileUtils.loadData(SPACES_DATA_FILE);
     }
 
     public void adminMenu() {
@@ -118,7 +118,7 @@ public class Admin {
     }
 
     private void viewAllReservations() {
-        reservations = FileUtils.loadReservaionsData(RESERVATIONS_DATA_FILE);
+        reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
 
         if (reservations.isEmpty()) {
             System.out.println("No reservations found.\n");
@@ -132,7 +132,7 @@ public class Admin {
     }
     
     public void saveSpacesData() {
-        FileUtils.saveSpacesData(spaces, SPACES_DATA_FILE);
+        FileUtils.saveData(spaces, SPACES_DATA_FILE);
     }
 
     
