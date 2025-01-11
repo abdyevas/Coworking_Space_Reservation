@@ -4,6 +4,7 @@ import exceptions.*;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Customer {
     private Scanner scanner = new Scanner(System.in);
@@ -67,16 +68,15 @@ public class Customer {
 
         System.out.println("\nAvailable Coworking Spaces:");
         
-        if (spaces == null) {
-            System.out.println("No spaces available at the moment.\n");
-            return;
-        }
-
-        for (Spaces space: spaces) {
-            if (space.getAvailable()) {
-                System.out.println(space);
-            }    
-        } 
+        Optional.ofNullable(spaces)
+                .filter(list -> !list.isEmpty())
+                .orElseGet(() -> {
+                    System.out.println("No spaces available at the moment.\n");
+                    return new ArrayList<>();
+                })
+                .stream()
+                .filter(Spaces::getAvailable)
+                .forEach(System.out::println);
     }
 
     private void makeReservation() throws InvalidSpaceIDException{
@@ -87,32 +87,22 @@ public class Customer {
             return;
         }
 
-        System.out.println("\nNew Reservaion: ");
-        
+        System.out.println("\nNew Reservaion: ");        
         System.out.println("\nEnter your full name: ");
         scanner.nextLine();
         String customerName = scanner.nextLine();
         
         System.out.println("Choose one of the available spaces: ");
-        for (Spaces space : spaces) {
-            if (space.getAvailable()) {
-                System.out.println("Available Space ID: " + space.getSpaceID());
-            }
-        }
+        spaces.stream()
+              .filter(Spaces::getAvailable)
+              .forEach(space -> System.out.println("Available Space ID: " + space.getSpaceID()));
+        
         int spaceID = scanner.nextInt();
         
-        Spaces chosenSpace = null; 
-        
-        for (Spaces space: spaces) {
-            if (space.getSpaceID() == spaceID && space.getAvailable()) {
-                chosenSpace = space;
-                break;
-            }
-        } 
-        
-        if (chosenSpace == null) {
-            throw new InvalidSpaceIDException("Invalid ID or Space is not available.\n");
-        }
+        Spaces chosenSpace = spaces.stream()
+                                   .filter(space -> space.getSpaceID() == spaceID && space.getAvailable())
+                                   .findFirst()
+                                   .orElseThrow(() -> new InvalidSpaceIDException("Invalid ID or Space is not available.\n")); 
 
         System.out.println("Enter date (DD-MM-YYYY): ");
         scanner.nextLine();
@@ -141,19 +131,14 @@ public class Customer {
         }
 
         System.out.println("\nEnter reservation ID to cancel: ");
-        for (Reservations reservation : reservations) {
-            System.out.println("Active reservation ID: " + reservation.getReservationID());
-        }
+        reservations.forEach(reservation -> System.out.println("Active reservation ID: " + reservation.getReservationID()));
 
         int id = scanner.nextInt();
-        Reservations canceledReservation = null;
 
-        for (Reservations reservation : reservations) {
-            if (reservation.getReservationID() == id) {
-                canceledReservation = reservation;
-                break;
-            }
-        }
+        Reservations canceledReservation = reservations.stream()
+                                                       .filter(reservation -> reservation.getReservationID() == id)
+                                                       .findFirst()
+                                                       .orElse(null);
 
         if (canceledReservation == null) {
             System.out.println("Reservation not found.\n");
@@ -161,12 +146,10 @@ public class Customer {
             reservations.remove(canceledReservation);
             System.out.println("Reservation removed successfully!");
 
-            for (Spaces space : spaces) {
-                if (space.getSpaceID() == canceledReservation.getSpaceID()) {
-                    space.setAvailable(true);
-                    break;
-                }
-            }
+            spaces.stream()
+                  .filter(space -> space.getSpaceID() == canceledReservation.getSpaceID())
+                  .findFirst()
+                  .ifPresent(space -> space.setAvailable(true));
         }
         
         updateData();    
@@ -178,9 +161,7 @@ public class Customer {
         } else {
             System.out.println("Your reservations:");
 
-            for (Reservations reservation : reservations) {
-                System.out.println(reservation);    
-            }
+            reservations.forEach(reservation -> System.out.println(reservation));
         }
     }
 

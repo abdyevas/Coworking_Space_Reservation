@@ -5,6 +5,7 @@ import classloader.CustomClassLoader;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Admin {
     private Scanner scanner = new Scanner(System.in);
@@ -94,41 +95,28 @@ public class Admin {
         }
 
         System.out.println("\nEnter space ID to remove: ");
-
-        for (Spaces space : spaces) {
-            System.out.println("Available space ID: " + space.getSpaceID());
-        }
+        spaces.forEach(space -> System.out.println("Available space ID: " + space.getSpaceID()));
         
         int id = scanner.nextInt();
-        boolean isRemoved = false;
+        boolean isRemoved = spaces.removeIf(space -> space.getSpaceID() == id);
 
-        for (Spaces space : spaces) {
-            if (space.getSpaceID() == id) {
-                spaces.remove(space);
-                isRemoved = true;
-                System.out.println("Space removed successfully!\n");
-                break;
-            }
-        }
         if (!isRemoved) {
             throw new InvalidSpaceIDException("Space ID now found: " + id + "\n");
+        } else {
+            System.out.println("Space removed successfully!\n");
+            saveSpacesData();
         }
-        
-        saveSpacesData();
     }
 
     private void viewAllReservations() {
         reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
 
-        if (reservations.isEmpty()) {
-            System.out.println("No reservations found.\n");
-        } else {
-            System.out.println("All reservations: ");
-
-            for (Reservations reservation : reservations) {
-                System.out.println(reservation);    
-            }
-        }
+        Optional.ofNullable(reservations)
+                .filter(list -> !list.isEmpty())
+                .ifPresentOrElse(
+                    list -> list.forEach(System.out::println), 
+                    () -> System.out.println("No reservations found.\n")
+                );
     }
     
     public void saveSpacesData() {
