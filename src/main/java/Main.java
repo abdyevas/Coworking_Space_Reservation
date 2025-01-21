@@ -1,11 +1,12 @@
-import models.Reservations;
-import models.Spaces;
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import models.Reservations;
+import models.Spaces;
+
 public class Main {
     public static void main(String[] args) {
+        @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
         ArrayList<Spaces> spaces = new ArrayList<>();
         ArrayList<Reservations> reservations = new ArrayList<>();
