@@ -1,7 +1,6 @@
-import models.Reservations;
-import models.Spaces;
-import exceptions.*;
 import classloader.CustomClassLoader;
+import exceptions.*;
+import models.*;
 
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -13,8 +12,8 @@ public class Admin {
     private ArrayList<Reservations> reservations;
     private int lastId = 0;
     
-    private static final String SPACES_DATA_FILE = "spaces.dat";
-    private static final String RESERVATIONS_DATA_FILE = "reservations.dat";
+    private static final String SPACES_DATA_FILE = "src/main/resources/spaces.dat";
+    private static final String RESERVATIONS_DATA_FILE = "src/main/resources/reservations.dat";
 
     public Admin(ArrayList<Reservations> reservations) {
         this.reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
