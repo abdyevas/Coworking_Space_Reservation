@@ -117,11 +117,10 @@ public class Admin {
                     () -> System.out.println("No reservations found.\n")
                 );
     }
-    
+
     public void saveSpacesData() {
         FileUtils.saveData(spaces, SPACES_DATA_FILE);
     }
-
     
     public static void loadCustomClass(String classPath, String className) {
         CustomClassLoader customClassLoader = new CustomClassLoader(classPath, Main.class.getClassLoader());
