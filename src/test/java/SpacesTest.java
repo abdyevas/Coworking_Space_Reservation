@@ -5,7 +5,7 @@ import models.Spaces;
 public class SpacesTest {
 
     @Test
-    public void testSpaceInitialization() {
+    public void givenNewSpace_WhenInitialized_ThenFieldsAreSetCorrectly() {
         Spaces space = new Spaces(1, "Conference Room", 100.0, true);
 
         assertEquals(1, space.getSpaceID());
@@ -13,7 +13,7 @@ public class SpacesTest {
     }
 
     @Test
-    public void testSetAvailability() {
+    public void givenAvailableSpace_WhenSetToUnavailable_ThenAvailabilityIsUpdated() {
         Spaces space = new Spaces(2, "Private Office", 150.0, true);
 
         space.setAvailable(false);
@@ -21,7 +21,7 @@ public class SpacesTest {
     }
 
     @Test
-    public void testToString() {
+    public void givenSpace_WhenToStringCalled_ThenReturnsFormattedString() {
         Spaces space = new Spaces(3, "Open Desk", 50.0, true);
 
         String expectedString = "\nID: 3\nType: Open Desk\nPrice: 50.0 AZN\nAvailability: Available\n";
