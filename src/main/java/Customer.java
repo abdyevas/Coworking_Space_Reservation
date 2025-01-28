@@ -9,14 +9,13 @@ public class Customer {
     private Scanner scanner = new Scanner(System.in);
     private ArrayList<Spaces> spaces;
     private ArrayList<Reservations> reservations;
-    private int reservationID = 0;
 
     private static final String SPACES_DATA_FILE = "src/main/resources/spaces.dat";
     private static final String RESERVATIONS_DATA_FILE = "src/main/resources/reservations.dat";
 
-    public Customer(ArrayList<Spaces> spaces) {
-        this.reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
-        this.spaces = FileUtils.loadData(SPACES_DATA_FILE);
+    public Customer(ArrayList<Spaces> spaces, ArrayList<Reservations> reservations) {
+        this.reservations = reservations;
+        this.spaces = spaces;
     }
 
     public void customerMenu() {
@@ -42,12 +41,40 @@ public class Customer {
                 browseSpaces();
             } else if (optionCustomer == 2) {
                 try {
-                    makeReservation();
+                    System.out.println("\nNew Reservation:");
+                    scanner.nextLine(); 
+
+                    System.out.print("Enter your full name: ");
+                    String customerName = scanner.nextLine();
+
+                    System.out.println("Choose one of the available spaces: ");
+                    spaces.stream()
+                        .filter(Spaces::getAvailable)
+                        .forEach(space -> System.out.println("Available Space ID: " + space.getSpaceID()));
+
+                    System.out.print("Enter Space ID: ");
+                    int spaceID = scanner.nextInt();
+
+                    System.out.print("Enter date (DD-MM-YYYY): ");
+                    scanner.nextLine();
+                    String date = scanner.nextLine();
+
+                    System.out.print("Enter start time (HH:MM): ");
+                    String startTime = scanner.nextLine();
+
+                    System.out.print("Enter end time (HH:MM): ");
+                    String endTime = scanner.nextLine();
+
+                    makeReservation(customerName, spaceID, date, startTime, endTime);
                 } catch (InvalidSpaceIDException e) {
-                    System.out.println(e.getMessage());
+                        System.out.println(e.getMessage());
                 }
             } else if (optionCustomer == 3) {
-                cancelReservation();
+                System.out.println("\nEnter reservation ID to cancel: ");
+                reservations.forEach(reservation -> System.out.println("Active reservation ID: " + reservation.getReservationID()));
+                int id = scanner.nextInt();
+                    
+                cancelReservation(id);
             } else if (optionCustomer == 4) {
                 viewMyReservations();
             } else if (optionCustomer == 5) {
@@ -62,9 +89,7 @@ public class Customer {
         }
     }
 
-    private void browseSpaces() {
-        spaces = FileUtils.loadData(SPACES_DATA_FILE);
-
+    public void browseSpaces() {
         System.out.println("\nAvailable Coworking Spaces:");
         
         Optional.ofNullable(spaces)
@@ -78,42 +103,21 @@ public class Customer {
                 .forEach(System.out::println);
     }
 
-    private void makeReservation() throws InvalidSpaceIDException{
-        spaces = FileUtils.loadData(SPACES_DATA_FILE);
-
+    public void makeReservation(String customerName, int spaceID, String date, String startTime, String endTime) throws InvalidSpaceIDException{
+        int reservationID = reservations.stream()
+                                .mapToInt(Reservations::getReservationID)
+                                .max()
+                                .orElse(0) + 1;
         if (spaces == null) {
             System.out.println("No spaces available at the moment.\n");
             return;
         }
 
-        System.out.println("\nNew Reservaion: ");        
-        System.out.println("\nEnter your full name: ");
-        scanner.nextLine();
-        String customerName = scanner.nextLine();
-        
-        System.out.println("Choose one of the available spaces: ");
-        spaces.stream()
-              .filter(Spaces::getAvailable)
-              .forEach(space -> System.out.println("Available Space ID: " + space.getSpaceID()));
-        
-        int spaceID = scanner.nextInt();
-        
         Spaces chosenSpace = spaces.stream()
                                    .filter(space -> space.getSpaceID() == spaceID && space.getAvailable())
                                    .findFirst()
                                    .orElseThrow(() -> new InvalidSpaceIDException("Invalid ID or Space is not available.\n")); 
 
-        System.out.println("Enter date (DD-MM-YYYY): ");
-        scanner.nextLine();
-        String date = scanner.next();
-        
-        System.out.println("Enter start time (HH:MM): ");
-        String startTime = scanner.next();
-        
-        System.out.println("Enter end time (HH:MM): ");
-        String endTime = scanner.next();
-
-        reservationID++; 
         Reservations reservation = new Reservations(reservationID, customerName, spaceID, date, startTime, endTime);
         reservations.add(reservation);
         
@@ -123,19 +127,14 @@ public class Customer {
         updateData();
     }
 
-    private void cancelReservation() {
+    public void cancelReservation(int reservationID) {
         if (reservations.isEmpty()) {
             System.out.println("No reservations found.\n");
             return;
         }
 
-        System.out.println("\nEnter reservation ID to cancel: ");
-        reservations.forEach(reservation -> System.out.println("Active reservation ID: " + reservation.getReservationID()));
-
-        int id = scanner.nextInt();
-
         Reservations canceledReservation = reservations.stream()
-                                                       .filter(reservation -> reservation.getReservationID() == id)
+                                                       .filter(reservation -> reservation.getReservationID() == reservationID)
                                                        .findFirst()
                                                        .orElse(null);
 
@@ -154,7 +153,7 @@ public class Customer {
         updateData();    
     }
 
-    private void viewMyReservations() {
+    public void viewMyReservations() {
         if (reservations.isEmpty()) {
             System.out.println("No reservations found.\n");
         } else {

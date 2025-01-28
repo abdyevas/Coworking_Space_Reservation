@@ -27,6 +27,10 @@ public class Reservations implements Serializable{
         return spaceID;
     }
 
+    public String getCustomerName() {
+        return customerName;
+    }
+
     @Override 
     public String toString() {
         return "\nID: " + reservationID + "\nCustomer: " + customerName + "\nSpace ID: " + spaceID + 

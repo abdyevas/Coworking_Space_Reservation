@@ -10,14 +10,12 @@ public class Admin {
     private Scanner scanner = new Scanner(System.in);
     private ArrayList<Spaces> spaces;
     private ArrayList<Reservations> reservations;
-    private int lastId = 0;
     
     private static final String SPACES_DATA_FILE = "src/main/resources/spaces.dat";
-    private static final String RESERVATIONS_DATA_FILE = "src/main/resources/reservations.dat";
-
-    public Admin(ArrayList<Reservations> reservations) {
-        this.reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
-        this.spaces = FileUtils.loadData(SPACES_DATA_FILE);
+    
+    public Admin(ArrayList<Spaces> spaces, ArrayList<Reservations> reservations) {
+        this.reservations = reservations;
+        this.spaces = spaces;
     }
 
     public void adminMenu() {
@@ -38,12 +36,28 @@ public class Admin {
             System.out.println("\nYour option: ");
 
             int optionAdmin = scanner.nextInt();
+            scanner.nextLine();
 
             if (optionAdmin == 1) {
-                addCoworkingSpace();
+                System.out.print("\nEnter space type: ");
+                String type = scanner.nextLine();
+
+                System.out.print("Enter price: ");
+                    double price = scanner.nextDouble();
+
+                addCoworkingSpace(type, price);
             } else if (optionAdmin == 2) {
+                if (spaces.isEmpty()) {
+                    System.out.println("No spaces found.\n");
+                    break;
+                }
+                System.out.println("\nEnter space ID to remove: ");
+                spaces.forEach(space -> System.out.println("Available space ID: " + space.getSpaceID()));
+
+                int id = scanner.nextInt();
+
                 try {
-                    removeCoworkingSpace();
+                    removeCoworkingSpace(id);
                 } catch (InvalidSpaceIDException e) {
                     System.out.println(e.getMessage()); 
                 }
@@ -52,7 +66,6 @@ public class Admin {
             } else if (optionAdmin == 4) {
                 System.out.println("Enter the details of the class to be loaded.\n");
                 System.out.println("Class directory: ");
-                scanner.nextLine();
                 String classPath = scanner.nextLine();
 
                 System.out.println("Full class name: ");
@@ -71,15 +84,11 @@ public class Admin {
         }
     }
 
-    private void addCoworkingSpace() {
-        lastId++;
-        
-        System.out.println("\nEnter space type: ");
-        scanner.nextLine();
-        String type = scanner.nextLine();
-        
-        System.out.println("Enter price: ");
-        double price = scanner.nextDouble();
+    public void addCoworkingSpace(String type, double price) {
+        int lastId = spaces.stream()
+                        .mapToInt(Spaces::getSpaceID)
+                        .max()
+                        .orElse(0) + 1;
 
         spaces.add(new Spaces(lastId, type, price, true));
         System.out.println("Space added successfully!\n");
@@ -87,29 +96,21 @@ public class Admin {
         saveSpacesData();
     }
 
-    private void removeCoworkingSpace() throws InvalidSpaceIDException{
-        if (spaces.isEmpty()) {
-            System.out.println("No spaces found.\n");
-            return;
-        }
+    public void removeCoworkingSpace(int id) throws InvalidSpaceIDException{
+        Optional<Spaces> spaceToRemove = spaces.stream()
+                                           .filter(space -> space.getSpaceID() == id)
+                                           .findFirst();
 
-        System.out.println("\nEnter space ID to remove: ");
-        spaces.forEach(space -> System.out.println("Available space ID: " + space.getSpaceID()));
-        
-        int id = scanner.nextInt();
-        boolean isRemoved = spaces.removeIf(space -> space.getSpaceID() == id);
-
-        if (!isRemoved) {
-            throw new InvalidSpaceIDException("Space ID now found: " + id + "\n");
-        } else {
+        if (spaceToRemove.isPresent()) {
+            spaces.remove(spaceToRemove.get());  
             System.out.println("Space removed successfully!\n");
             saveSpacesData();
+        } else {
+            throw new InvalidSpaceIDException("Space ID not found: " + id + "\n");
         }
     }
 
-    private void viewAllReservations() {
-        reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
-
+    public void viewAllReservations() {
         Optional.ofNullable(reservations)
                 .filter(list -> !list.isEmpty())
                 .ifPresentOrElse(
@@ -117,11 +118,10 @@ public class Admin {
                     () -> System.out.println("No reservations found.\n")
                 );
     }
-    
+
     public void saveSpacesData() {
         FileUtils.saveData(spaces, SPACES_DATA_FILE);
     }
-
     
     public static void loadCustomClass(String classPath, String className) {
         CustomClassLoader customClassLoader = new CustomClassLoader(classPath, Main.class.getClassLoader());
