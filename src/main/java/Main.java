@@ -11,7 +11,7 @@ public class Main {
         ArrayList<Spaces> spaces = new ArrayList<>();
         ArrayList<Reservations> reservations = new ArrayList<>();
 
-        Admin admin = new Admin(reservations);
+        Admin admin = new Admin(spaces, reservations);
         Customer customer = new Customer(spaces);
 
         System.out.println("\nWelcome to the Coworking Space Reservation System!");
