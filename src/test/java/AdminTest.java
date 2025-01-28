@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import exceptions.InvalidSpaceIDException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,5 +81,33 @@ public class AdminTest {
         admin.viewAllReservations();
 
         assertTrue(reservations.isEmpty());
+    }
+    
+    @Test
+    void givenValidClass_whenLoadCustomClass_thenClassIsLoadedSuccessfully() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(outputStream);
+        System.setOut(printStream);
+
+        String validClassPath = "java/";
+        String validClassName = "models.Spaces";  
+        Admin.loadCustomClass(validClassPath, validClassName);
+
+        String output = outputStream.toString().trim();
+        assertTrue(output.contains("Class " + validClassName + " loaded successfully!"));
+    }
+
+    @Test
+    void givenInvalidClass_whenLoadCustomClass_thenExceptionMessageIsPrinted() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(outputStream);
+        System.setOut(printStream);
+
+        String validClassPath = "java/";
+        String invalidClassName = "models.InvalidClass";  
+        Admin.loadCustomClass(validClassPath, invalidClassName);
+
+        String output = outputStream.toString().trim();
+        assertTrue(output.contains("ClassNotFoundException") || output.contains("Error loading the class"));
     }
 }

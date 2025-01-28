@@ -12,7 +12,7 @@ public class Main {
         ArrayList<Reservations> reservations = new ArrayList<>();
 
         Admin admin = new Admin(spaces, reservations);
-        Customer customer = new Customer(spaces);
+        Customer customer = new Customer(spaces, reservations);
 
         System.out.println("\nWelcome to the Coworking Space Reservation System!");
         System.out.println("Find, book, and manage coworking spaces easily.\n");

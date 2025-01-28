@@ -12,8 +12,7 @@ public class Admin {
     private ArrayList<Reservations> reservations;
     
     private static final String SPACES_DATA_FILE = "src/main/resources/spaces.dat";
-    private static final String RESERVATIONS_DATA_FILE = "src/main/resources/reservations.dat";
-
+    
     public Admin(ArrayList<Spaces> spaces, ArrayList<Reservations> reservations) {
         this.reservations = reservations;
         this.spaces = spaces;
@@ -67,7 +66,6 @@ public class Admin {
             } else if (optionAdmin == 4) {
                 System.out.println("Enter the details of the class to be loaded.\n");
                 System.out.println("Class directory: ");
-                scanner.nextLine();
                 String classPath = scanner.nextLine();
 
                 System.out.println("Full class name: ");
@@ -113,8 +111,6 @@ public class Admin {
     }
 
     public void viewAllReservations() {
-        reservations = FileUtils.loadData(RESERVATIONS_DATA_FILE);
-
         Optional.ofNullable(reservations)
                 .filter(list -> !list.isEmpty())
                 .ifPresentOrElse(
