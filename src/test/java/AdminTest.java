@@ -26,7 +26,7 @@ public class AdminTest {
 
         reservations.add(new Reservations(1, "Sabina A", 1, "25-01-2025", "10:00", "12:00"));
 
-        admin = new Admin(spaces, reservations);
+        admin = new Admin();
     }
 
     @Test
