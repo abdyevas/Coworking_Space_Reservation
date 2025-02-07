@@ -1,18 +1,12 @@
-import java.util.ArrayList;
 import java.util.Scanner;
-
-import models.Reservations;
-import models.Spaces;
 
 public class Main {
     public static void main(String[] args) {
         @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Spaces> spaces = new ArrayList<>();
-        ArrayList<Reservations> reservations = new ArrayList<>();
 
-        Admin admin = new Admin(spaces, reservations);
-        Customer customer = new Customer(spaces, reservations);
+        Admin admin = new Admin();
+        Customer customer = new Customer();
 
         System.out.println("\nWelcome to the Coworking Space Reservation System!");
         System.out.println("Find, book, and manage coworking spaces easily.\n");

@@ -34,9 +34,15 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <mainClass>Main</mainClass> 
-                    <encoding>UTF-8</encoding>
+                    <mainClass>Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>
@@ -54,6 +60,11 @@
             <artifactId>mockito-core</artifactId>
             <version>5.5.0</version> 
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.5</version>
         </dependency>
     </dependencies>
 
