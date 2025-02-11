@@ -1,23 +1,31 @@
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import models.Reservations;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import models.*;
 
 public class ReservationsTest {
 
     @Test
     public void givenNewReservation_WhenInitialized_ThenFieldsAreSetCorrectly() {
-        Reservations reservation = new Reservations(1, "Sabina A", 101, "2025-01-25", "09:00", "17:00");
+        Spaces space = new Spaces("Conference Room", 100.0, true);
+        Reservations reservation = new Reservations("Sabina A", space, LocalDate.parse("2025-01-25"), LocalTime.parse("09:00"), LocalTime.parse("11:00"));
 
-        assertEquals(1, reservation.getReservationID());
-        assertEquals(101, reservation.getSpaceID());
+        assertEquals("Conference Room", reservation.getSpace().getType());
+        assertEquals(100, reservation.getSpace().getPrice());
         assertTrue(reservation.toString().contains("Sabina A"));
     }
 
     @Test
     public void givenReservation_WhenToStringCalled_ThenReturnsFormattedString() {
-        Reservations reservation = new Reservations(2, "Kanan B", 202, "2025-02-15", "10:00", "14:00");
+        Spaces space = new Spaces("Conference Room", 100.0, true);
+        Reservations reservation = new Reservations("Kanan B", space, LocalDate.parse("2025-02-15"), LocalTime.parse("10:00"), LocalTime.parse("14:00"));
 
-        String expectedString = "\nID: 2\nCustomer: Kanan B\nSpace ID: 202\nDate: 2025-02-15\nTime: 10:00 to 14:00\n";
-        assertEquals(expectedString, reservation.toString());
+        String reservationString = reservation.toString();
+    
+        assertTrue(reservationString.contains("Customer: Kanan B"));
+        assertTrue(reservationString.contains("Date: 2025-02-15"));
+        assertTrue(reservationString.contains("Time: 10:00 to 14:00"));
     }
 }

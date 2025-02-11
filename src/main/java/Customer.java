@@ -1,16 +1,22 @@
 import exceptions.InvalidSpaceIDException;
-import database.*;
-
-import java.sql.Date;
-import java.sql.Time;
-import java.text.SimpleDateFormat;
-
+import models.*;
+import repository.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class Customer {
+
+    @Autowired
+    private SpacesRepository spacesRepository;
+
+    @Autowired
+    private ReservationsRepository reservationsRepository;
+    
     private Scanner scanner = new Scanner(System.in);
-    private SpacesDAO spacesDAO = new SpacesDAO();
-    private ReservationsDAO reservationsDAO = new ReservationsDAO();
 
     public Customer() {}
 
@@ -43,10 +49,7 @@ public class Customer {
                     String customerName = scanner.nextLine();
 
                     System.out.println("Choose one of the available spaces: ");
-                    List<Map<String, Object>> allSpaces = spacesDAO.getAllSpaces();
-                    allSpaces.stream()
-                        .filter(space -> (boolean) space.get("available"))
-                        .forEach(space -> System.out.println("Available Space ID: " + space.get("id")));
+                    browseSpaces();
 
                     System.out.print("Enter Space ID: ");
                     int spaceID = scanner.nextInt();
@@ -67,8 +70,7 @@ public class Customer {
                 }
             } else if (optionCustomer == 3) {
                 System.out.println("\nEnter reservation ID to cancel: ");
-                List<Map<String, Object>> reservations = reservationsDAO.getAllReservations();
-                reservations.forEach(reservation -> System.out.println("Active Reservation ID: " + reservation.get("id")));
+                viewMyReservations();
                 int id = scanner.nextInt();
                 scanner.nextLine(); 
                     
@@ -89,75 +91,69 @@ public class Customer {
 
     public void browseSpaces() {
         System.out.println("\nAvailable Coworking Spaces:");
-        List<Map<String, Object>> spaces = spacesDAO.getAllSpaces();
+        List<Spaces> spaces = spacesRepository.findAll();
         if (spaces.isEmpty()) {
             System.out.println("No spaces available at the moment.\n");
         } else {
             spaces.stream()
-                .filter(space -> (boolean) space.get("available"))
+                .filter(Spaces::getAvailable)
                 .forEach(space -> System.out.println(space));
         }
     }
 
-    public void makeReservation(String customerName, int spaceID, String date, String startTime, String endTime) 
-        throws InvalidSpaceIDException {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-            java.util.Date parsedDate;
+    public void makeReservation(String customerName, int spaceID, String date, String startTime, String endTime) throws InvalidSpaceIDException {
+        LocalDate reservationDate;
         try {
-            parsedDate = sdf.parse(date);
+            reservationDate = LocalDate.parse(date); 
         } catch (Exception e) {
-            System.out.println("Invalid date format. Please use DD-MM-YYYY.");
+            System.out.println("Invalid date format. Please use YYYY-MM-DD.");
             return;
         }
-        Date sqlDate = new Date(parsedDate.getTime());
-
-        Time sqlStartTime;
-        Time sqlEndTime;
+        LocalTime reservationStartTime;
+        LocalTime reservationEndTime;
         try {
-            sqlStartTime = Time.valueOf(startTime + ":00"); 
-            sqlEndTime = Time.valueOf(endTime + ":00");     
-        } catch (IllegalArgumentException e) {
+            reservationStartTime = LocalTime.parse(startTime); // Парсим строку в LocalTime
+            reservationEndTime = LocalTime.parse(endTime);
+        } catch (Exception e) {
             System.out.println("Invalid time format. Please use HH:MM.");
             return;
         }
 
-        List<Map<String, Object>> spaces = spacesDAO.getAllSpaces();
-        Optional<Map<String, Object>> chosenSpaceOpt = spaces.stream()
-                .filter(space -> (int) space.get("id") == spaceID && (boolean) space.get("available"))
-                .findFirst();
+        Optional<Spaces> chosenSpaceOpt = spacesRepository.findById(spaceID);
 
         if (chosenSpaceOpt.isEmpty()) {
             throw new InvalidSpaceIDException("Invalid ID or space is not available.\n");
         }
 
-        reservationsDAO.addReservation(customerName, spaceID, sqlDate, sqlStartTime, sqlEndTime);
-        spacesDAO.updateSpaceAvailability(spaceID, false);
+        Reservations reservation = new Reservations(customerName, chosenSpaceOpt.get(), reservationDate, reservationStartTime, reservationEndTime);
+        reservationsRepository.save(reservation);
 
+        chosenSpaceOpt.get().setAvailable(false);
+        spacesRepository.save(chosenSpaceOpt.get());
+        
         System.out.println("Reservation made successfully!\n");
     }
 
     public void cancelReservation(int reservationID) {
-        List<Map<String, Object>> reservations = reservationsDAO.getAllReservations();
-        Optional<Map<String, Object>> reservationOpt = reservations.stream()
-            .filter(reservation -> (int) reservation.get("id") == reservationID)
-            .findFirst();
+        Optional<Reservations> reservationOpt = reservationsRepository.findById(reservationID);
 
         if (reservationOpt.isEmpty()) {
             System.out.println("Reservation not found.\n");
             return;
         }
 
-        Map<String, Object> reservation = reservationOpt.get();
-        int spaceID = (int) reservation.get("space_id");
+        Reservations reservation = reservationOpt.get();
+        Spaces space = reservation.getSpace();
 
-        reservationsDAO.removeReservation(reservationID);
-        spacesDAO.updateSpaceAvailability(spaceID, true);
+        reservationsRepository.delete(reservation);
+        space.setAvailable(true);
+        spacesRepository.save(space);
 
         System.out.println("Reservation removed successfully!\n");
     }
 
     public void viewMyReservations() {
-        List<Map<String, Object>> reservations = reservationsDAO.getAllReservations();
+        List<Reservations> reservations = reservationsRepository.findAll();
         if (reservations.isEmpty()) {
             System.out.println("No reservations found.\n");
         } else {
