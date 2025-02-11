@@ -1,14 +1,22 @@
 import classloader.CustomClassLoader;
 import exceptions.*;
-
-import database.*; 
+import repository.ReservationsRepository;
+import repository.SpacesRepository;
+import models.*;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class Admin {
-    private Scanner scanner = new Scanner(System.in);
+
+    @Autowired
+    private SpacesRepository spacesRepository;
+
+    @Autowired
+    private ReservationsRepository reservationsRepository;
     
-    private SpacesDAO spacesDAO = new SpacesDAO();
-    private ReservationsDAO reservationsDAO = new ReservationsDAO();
+    private Scanner scanner = new Scanner(System.in);
     
     public Admin() {}
 
@@ -42,8 +50,8 @@ public class Admin {
                 addCoworkingSpace(type, price);
             } else if (optionAdmin == 2) {
                 System.out.println("\nEnter space ID to remove: ");
-                spacesDAO.getAllSpaces().forEach(space -> 
-                    System.out.println("Available space ID: " + space.get("id"))
+                spacesRepository.findAll().forEach(space -> 
+                    System.out.println("Available space ID: " + space.getSpaceID())
                 );
 
                 int id = scanner.nextInt();
@@ -77,18 +85,17 @@ public class Admin {
     }
 
     public void addCoworkingSpace(String type, double price) {
-        spacesDAO.addSpace(type, price, true); 
+        Spaces space = new Spaces(type, price, true);
+        
+        spacesRepository.save(space); 
         System.out.println("Space added successfully!\n");
     }
 
     public void removeCoworkingSpace(int id) throws InvalidSpaceIDException {
-        List<Map<String, Object>> spaces = spacesDAO.getAllSpaces();
-        Optional<Map<String, Object>> spaceToRemove = spaces.stream()
-                                               .filter(space -> (int) space.get("id") == id)
-                                               .findFirst();
+        Optional<Spaces> spaceToRemove = spacesRepository.findById(id);
 
         if (spaceToRemove.isPresent()) {
-            spacesDAO.removeSpace(id);  
+            spacesRepository.delete(spaceToRemove.get());  
             System.out.println("Space removed successfully!\n");
         } else {
             throw new InvalidSpaceIDException("Space ID not found: " + id + "\n");
@@ -96,7 +103,7 @@ public class Admin {
     }
 
     public void viewAllReservations() {
-        List<Map<String, Object>> reservations = reservationsDAO.getAllReservations();
+        List<Reservations> reservations = reservationsRepository.findAll();
         if (!reservations.isEmpty()) {
             reservations.forEach(reservation -> System.out.println(reservation));
         } else {

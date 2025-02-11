@@ -17,7 +17,7 @@ public class FileUtils {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(dataFile))) {
             return (ArrayList<T>) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Cannoat load data from " + dataFile + ": " + e.getMessage());
+            System.err.println("Cannot load data from " + dataFile + ": " + e.getMessage());
             return new ArrayList<>();
         }
     }
