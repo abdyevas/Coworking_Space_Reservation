@@ -1,21 +1,36 @@
 package models;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "reservations")
 public class Reservations implements Serializable{
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int reservationID;
-    private String customerName; 
-    private int spaceID;
-    private String date; 
-    private String startTime; 
-    private String endTime;
 
-    public Reservations(int id, String name, int spaceID, String date, String startTime, String endTime) {
-        this.reservationID = id;
+    private String customerName; 
+
+    @ManyToOne
+    @JoinColumn(name = "space_id", nullable = false)
+    private Spaces space;
+
+    private LocalDate date; 
+    private LocalTime startTime; 
+    private LocalTime endTime;
+
+    public Reservations() {}
+
+    public Reservations(String name, Spaces space, LocalDate date, LocalTime startTime, LocalTime endTime) {
         this.customerName = name;
-        this.spaceID = spaceID;
+        this.space = space;
         this.date = date;
-        this.startTime =startTime;
+        this.startTime = startTime;
         this.endTime = endTime;
     }
 
@@ -23,8 +38,8 @@ public class Reservations implements Serializable{
         return reservationID;
     }
 
-    public int getSpaceID() {
-        return spaceID;
+    public Spaces getSpace() {
+        return space;
     }
 
     public String getCustomerName() {
@@ -33,7 +48,7 @@ public class Reservations implements Serializable{
 
     @Override 
     public String toString() {
-        return "\nID: " + reservationID + "\nCustomer: " + customerName + "\nSpace ID: " + spaceID + 
+        return "\nID: " + reservationID + "\nCustomer: " + customerName + "\nSpace ID: " + space.getSpaceID() + 
         "\nDate: " + date + "\nTime: " + startTime + " to " + endTime  + "\n";
     }
 }
