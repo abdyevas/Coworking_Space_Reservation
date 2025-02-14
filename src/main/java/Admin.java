@@ -6,6 +6,7 @@ import models.*;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class Admin {
@@ -17,8 +18,6 @@ public class Admin {
     private ReservationsRepository reservationsRepository;
     
     private Scanner scanner = new Scanner(System.in);
-    
-    public Admin() {}
 
     public void adminMenu() {
         String adminMenu = """
@@ -84,22 +83,23 @@ public class Admin {
         }
     }
 
+    @Transactional
     public void addCoworkingSpace(String type, double price) {
         Spaces space = new Spaces(type, price, true);
-        
         spacesRepository.save(space); 
         System.out.println("Space added successfully!\n");
     }
 
+    @Transactional
     public void removeCoworkingSpace(int id) throws InvalidSpaceIDException {
         Optional<Spaces> spaceToRemove = spacesRepository.findById(id);
 
-        if (spaceToRemove.isPresent()) {
-            spacesRepository.delete(spaceToRemove.get());  
-            System.out.println("Space removed successfully!\n");
-        } else {
+        if (spaceToRemove.isEmpty()) {
             throw new InvalidSpaceIDException("Space ID not found: " + id + "\n");
         }
+
+        spacesRepository.delete(spaceToRemove.get());
+        System.out.println("Space removed successfully!\n");
     }
 
     public void viewAllReservations() {
@@ -117,7 +117,7 @@ public class Admin {
             Class<?> loaderClass = customClassLoader.loadClass(className);
             System.out.println("Class " + loaderClass.getName() + " loaded successfully!\n");
         } catch (Exception e) {
-            System.out.println(e.getMessage() + "\n");
+            e.printStackTrace();
         }
     }
 }

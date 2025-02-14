@@ -2,49 +2,60 @@ package models;
 
 import java.io.Serializable;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "spaces")
 public class Spaces implements Serializable {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "space_id")
     private int spaceID;
 
+    @Column(name = "type", nullable = false)
     private String type;
-    private double price;
-    private boolean isAvailable;
 
-    @OneToMany(mappedBy = "space", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reservations> reservations;
+    @Column(name = "price", nullable = false)
+    private double price;
+
+    @Column(name = "is_available", nullable = false)
+    private Boolean isAvailable;
+
+    @OneToMany(mappedBy = "space", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Reservations> reservations = new ArrayList<>();
 
     public Spaces() {}
 
-    public Spaces(String type, double price, boolean isAvailable) {
+    public Spaces(String type, double price, Boolean isAvailable) {
         this.type = type;
         this.price = price;
         this.isAvailable = isAvailable;
-    }
-
-    public void setSpaceID(int spaceID) {
-        this.spaceID = spaceID;
     }
 
     public int getSpaceID() {
         return spaceID;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setSpaceID(int spaceID) {
+        this.spaceID = spaceID;
     }
 
     public String getType() {
         return type;
     }
 
-    public boolean getAvailable() {
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Boolean getAvailable() {
         return isAvailable;
+    }
+
+    public void setAvailable(Boolean available) {
+        this.isAvailable = available;
     }
 
     public double getPrice() {
@@ -53,10 +64,6 @@ public class Spaces implements Serializable {
 
     public void setPrice(double price) {
         this.price = price;
-    }
-
-    public void setAvailable(boolean available) {
-        this.isAvailable = available;
     }
 
     public List<Reservations> getReservations() {
@@ -69,7 +76,7 @@ public class Spaces implements Serializable {
 
     @Override
     public String toString() {
-        return "\nID: " + spaceID + "\nType: " + type + "\nPrice: " + price + " AZN"  + 
+        return "\nID: " + spaceID + "\nType: " + type + "\nPrice: " + price + " AZN" +
         "\nAvailability: " + (isAvailable ? "Available\n" : "Not available\n");
     }
 }

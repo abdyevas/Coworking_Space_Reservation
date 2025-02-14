@@ -3,22 +3,25 @@ import models.*;
 import repository.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class Customer {
 
-    @Autowired
-    private SpacesRepository spacesRepository;
+    private final SpacesRepository spacesRepository;
+    private final ReservationsRepository reservationsRepository;
+    private final Scanner scanner;
 
     @Autowired
-    private ReservationsRepository reservationsRepository;
-    
-    private Scanner scanner = new Scanner(System.in);
-
-    public Customer() {}
+    public Customer(SpacesRepository spacesRepository, ReservationsRepository reservationsRepository) {
+        this.spacesRepository = spacesRepository;
+        this.reservationsRepository = reservationsRepository;
+        this.scanner = new Scanner(System.in);
+    }
 
     public void customerMenu() {
         String customerMenu = """
@@ -36,6 +39,10 @@ public class Customer {
         while (true) {
             System.out.println(customerMenu);
             System.out.print("\nYour option: ");
+            while (!scanner.hasNextInt()) {
+                System.out.println("Invalid input. Please enter a number.");
+                scanner.next();
+            }
             int optionCustomer = scanner.nextInt();
             scanner.nextLine(); 
 
@@ -101,19 +108,24 @@ public class Customer {
         }
     }
 
+    @Transactional
     public void makeReservation(String customerName, int spaceID, String date, String startTime, String endTime) throws InvalidSpaceIDException {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
         LocalDate reservationDate;
         try {
-            reservationDate = LocalDate.parse(date); 
+            reservationDate = LocalDate.parse(date, dateFormatter); 
         } catch (Exception e) {
-            System.out.println("Invalid date format. Please use YYYY-MM-DD.");
+            System.out.println("Invalid date format. Please use DD-MM-YYYY.");
             return;
         }
+
         LocalTime reservationStartTime;
         LocalTime reservationEndTime;
         try {
-            reservationStartTime = LocalTime.parse(startTime); // Парсим строку в LocalTime
-            reservationEndTime = LocalTime.parse(endTime);
+            reservationStartTime = LocalTime.parse(startTime, timeFormatter);
+            reservationEndTime = LocalTime.parse(endTime, timeFormatter);
         } catch (Exception e) {
             System.out.println("Invalid time format. Please use HH:MM.");
             return;
@@ -134,6 +146,7 @@ public class Customer {
         System.out.println("Reservation made successfully!\n");
     }
 
+    @Transactional
     public void cancelReservation(int reservationID) {
         Optional<Reservations> reservationOpt = reservationsRepository.findById(reservationID);
 
