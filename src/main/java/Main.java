@@ -1,19 +1,25 @@
-import java.util.Scanner;
-
+import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Main {
+public class Main implements CommandLineRunner {
+
+    @Autowired
+    private Admin adminService;
+
+    @Autowired
+    private Customer customerService;
+
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
-        
-        @SuppressWarnings("resource")
-        Scanner scanner = new Scanner(System.in);
+        System.out.println("Coworking Space Reservation System is running...");
+    }
 
-        Admin admin = new Admin();
-        Customer customer = new Customer();
-
+    @Override
+    public void run(String... args) throws Exception {
         System.out.println("\nWelcome to the Coworking Space Reservation System!");
         System.out.println("Find, book, and manage coworking spaces easily.\n");
 
@@ -25,24 +31,25 @@ public class Main {
                 |   3. Exit.                           |       
                 +--------------------------------------+ 
                 """;
-        
-        while (true) {
-            System.out.println(mainMenu);
-            System.out.println("\nYour option: ");
 
-            int option = scanner.nextInt();
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (true) {
+                System.out.println(mainMenu);
+                System.out.println("\nYour option: ");
+                int option = scanner.nextInt();
 
-            if (option == 1) {
-                System.out.println("Switching to the Admin menu...\n");
-                admin.adminMenu();
-            } else if (option == 2) {
-                System.out.println("Switching to the User menu...\n");
-                customer.customerMenu();
-            } else if (option == 3) {
-                System.out.println("Quiting the system... Bye!\n");
-                System.exit(0);
-            } else { 
-                System.out.println("No such option. Please try again.\n");
+                if (option == 1) {
+                    System.out.println("Switching to the Admin menu...\n");
+                    adminService.adminMenu(); 
+                } else if (option == 2) {
+                    System.out.println("Switching to the User menu...\n");
+                    customerService.customerMenu();  
+                } else if (option == 3) {
+                    System.out.println("Quiting the system... Bye!\n");
+                    return;
+                } else {
+                    System.out.println("No such option. Please try again.\n");
+                }
             }
         }
     }
